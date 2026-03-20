@@ -1,12 +1,20 @@
 import streamlit as st
-import joblib
 import pandas as pd
+import joblib
 import os
-import subprocess
+from sklearn.ensemble import RandomForestRegressor
 
-# ---------------- AUTO MODEL TRAIN ---------------- #
+# ---------------- AUTO TRAIN MODEL ---------------- #
 if not os.path.exists("model.pkl"):
-    subprocess.run(["python", "src/train_model.py"])
+    df = pd.read_csv("data/cleaned_data.csv")
+
+    X = df.drop("AQI", axis=1)
+    y = df["AQI"]
+
+    model_temp = RandomForestRegressor(n_estimators=50)
+    model_temp.fit(X, y)
+
+    joblib.dump(model_temp, "model.pkl")
 
 # ---------------- LOAD MODEL ---------------- #
 model = joblib.load("model.pkl")
@@ -15,7 +23,6 @@ model = joblib.load("model.pkl")
 st.set_page_config(page_title="🌍 AQI AI System", layout="wide")
 
 st.title("🌍 AI-Powered Air Quality Prediction System")
-
 st.markdown("---")
 
 # ---------------- INPUT ---------------- #
@@ -78,7 +85,7 @@ if st.button("🚀 Predict AQI", key="predict"):
 
     st.markdown("---")
 
-    # Health Recommendation
+    # Health Advisory
     st.subheader("🏥 Health Advisory")
 
     if aqi > 200:
