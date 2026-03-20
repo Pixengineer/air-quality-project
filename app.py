@@ -1,54 +1,24 @@
-import os
-import subprocess
-
-# auto train model if not exists
-if not os.path.exists("model.pkl"):
-    subprocess.run(["python", "src/train_model.py"])
-
-
-    
 import streamlit as st
 import joblib
 import pandas as pd
+import os
+import subprocess
 
-# page config
-st.set_page_config(page_title="🌍 AQI AI System", layout="wide")
+# ---------------- AUTO MODEL TRAIN ---------------- #
+if not os.path.exists("model.pkl"):
+    subprocess.run(["python", "src/train_model.py"])
 
-# custom CSS (🔥 futuristic look)
-st.markdown("""
-    <style>
-    body {
-        background-color: #0e1117;
-        color: white;
-    }
-    .main {
-        background: linear-gradient(135deg, #0e1117, #1c1f2b);
-    }
-    h1, h2, h3 {
-        text-align: center;
-        color: #00f2ff;
-    }
-    .stButton>button {
-        background: linear-gradient(90deg, #00f2ff, #007bff);
-        color: white;
-        border-radius: 10px;
-        height: 50px;
-        width: 100%;
-        font-size: 16px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# load model
+# ---------------- LOAD MODEL ---------------- #
 model = joblib.load("model.pkl")
 
-# title
+# ---------------- UI ---------------- #
+st.set_page_config(page_title="🌍 AQI AI System", layout="wide")
+
 st.title("🌍 AI-Powered Air Quality Prediction System")
 
 st.markdown("---")
 
-# ---------------- INPUT SECTION ---------------- #
-
+# ---------------- INPUT ---------------- #
 st.subheader("📥 Enter Pollution Data")
 
 col1, col2, col3 = st.columns(3)
@@ -82,7 +52,6 @@ with col5:
     month = st.number_input("Month", value=1)
 
 # ---------------- PREDICTION ---------------- #
-
 st.markdown("---")
 
 if st.button("🚀 Predict AQI", key="predict"):
@@ -96,7 +65,7 @@ if st.button("🚀 Predict AQI", key="predict"):
     result = model.predict(data)
     aqi = result[0]
 
-    st.markdown("## 🎯 Prediction Result")
+    st.subheader("🎯 Prediction Result")
 
     if aqi <= 50:
         st.success(f"🌿 AQI: {aqi:.2f} (Good)")
@@ -109,7 +78,7 @@ if st.button("🚀 Predict AQI", key="predict"):
 
     st.markdown("---")
 
-    # Health advice
+    # Health Recommendation
     st.subheader("🏥 Health Advisory")
 
     if aqi > 200:
@@ -120,17 +89,15 @@ if st.button("🚀 Predict AQI", key="predict"):
         st.success("😊 Air is safe")
 
 # ---------------- GRAPH ---------------- #
-
 st.markdown("---")
 
-st.subheader("📈 AQI Trend Dashboard")
+st.subheader("📈 AQI Trend")
 
 if st.button("📊 Show Graph", key="graph"):
     df = pd.read_csv("data/cleaned_data.csv")
     st.line_chart(df.tail(100)["AQI"])
 
-# ---------------- FUTURE ---------------- #
-
+# ---------------- FUTURE PREDICTION ---------------- #
 st.markdown("---")
 
 st.subheader("🔮 Future AQI Prediction")
