@@ -4,10 +4,10 @@ import joblib
 import os
 from sklearn.ensemble import RandomForestRegressor
 
-# ---------------- PATH ---------------- #
+
 DATA_PATH = "data/cleaned_data.csv"
 
-# ---------------- AUTO TRAIN MODEL ---------------- #
+
 if not os.path.exists("model.pkl"):
 
     if not os.path.exists(DATA_PATH):
@@ -24,16 +24,16 @@ if not os.path.exists("model.pkl"):
 
     joblib.dump(model_temp, "model.pkl")
 
-# ---------------- LOAD MODEL ---------------- #
+
 model = joblib.load("model.pkl")
 
-# ---------------- UI ---------------- #
+
 st.set_page_config(page_title="🌍 AQI AI System", layout="wide")
 
 st.title("🌍 AI-Powered Air Quality Prediction System")
 st.markdown("---")
 
-# ---------------- INPUT ---------------- #
+
 st.subheader("📥 Enter Pollution Data")
 
 col1, col2, col3 = st.columns(3)
@@ -66,7 +66,7 @@ with col4:
 with col5:
     month = st.number_input("Month", value=1)
 
-# ---------------- PREDICTION ---------------- #
+
 if st.button("🚀 Predict AQI", key="predict"):
 
     data = pd.DataFrame([[pm25, pm10, no, no2, nox, nh3, co, so2, o3,
@@ -88,7 +88,7 @@ if st.button("🚀 Predict AQI", key="predict"):
     else:
         st.error(f"AQI: {aqi:.2f} (Very Poor)")
 
-# ---------------- GRAPH ---------------- #
+
 st.markdown("---")
 st.subheader("📈 AQI Trend (Last 100 Records)")
 
@@ -96,7 +96,7 @@ if st.button("📊 Show Graph", key="graph"):
     df = pd.read_csv(DATA_PATH)
     st.line_chart(df.tail(100)["AQI"])
 
-# ---------------- FUTURE PREDICTION ---------------- #
+
 st.markdown("---")
 st.subheader("🔮 Future AQI Prediction")
 
