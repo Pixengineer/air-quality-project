@@ -4,9 +4,17 @@ import joblib
 import os
 from sklearn.ensemble import RandomForestRegressor
 
+# ---------------- PATH FIX ---------------- #
+DATA_PATH = "data/cleaned_data.csv"
+
 # ---------------- AUTO TRAIN MODEL ---------------- #
 if not os.path.exists("model.pkl"):
-    df = pd.read_csv("data/cleaned_data.csv")
+
+    if not os.path.exists(DATA_PATH):
+        st.error("❌ Data file not found! Check folder name: data/cleaned_data.csv")
+        st.stop()
+
+    df = pd.read_csv(DATA_PATH)
 
     X = df.drop("AQI", axis=1)
     y = df["AQI"]
@@ -59,8 +67,6 @@ with col5:
     month = st.number_input("Month", value=1)
 
 # ---------------- PREDICTION ---------------- #
-st.markdown("---")
-
 if st.button("🚀 Predict AQI", key="predict"):
 
     data = pd.DataFrame([[pm25, pm10, no, no2, nox, nh3, co, so2, o3,
@@ -69,8 +75,7 @@ if st.button("🚀 Predict AQI", key="predict"):
                                  'CO', 'SO2', 'O3', 'Benzene',
                                  'Toluene', 'Xylene', 'year', 'month'])
 
-    result = model.predict(data)
-    aqi = result[0]
+    aqi = model.predict(data)[0]
 
     st.subheader("🎯 Prediction Result")
 
@@ -82,66 +87,3 @@ if st.button("🚀 Predict AQI", key="predict"):
         st.error(f"😷 AQI: {aqi:.2f} (Poor)")
     else:
         st.error(f"☠️ AQI: {aqi:.2f} (Very Poor)")
-
-    st.markdown("---")
-
-    # Health Advisory
-    st.subheader("🏥 Health Advisory")
-
-    if aqi > 200:
-        st.error("🚨 Avoid going outside!")
-    elif aqi > 100:
-        st.warning("😷 Mask recommended")
-    else:
-        st.success("😊 Air is safe")
-
-# ---------------- GRAPH ---------------- #
-st.markdown("---")
-
-st.subheader("📈 AQI Trend")
-
-if st.button("📊 Show Graph", key="graph"):
-    df = pd.read_csv("data/cleaned_data.csv")
-    st.line_chart(df.tail(100)["AQI"])
-
-# ---------------- FUTURE PREDICTION ---------------- #
-st.markdown("---")
-
-st.subheader("🔮 Future AQI Prediction")
-
-col6, col7 = st.columns(2)
-
-with col6:
-    future_year = st.number_input("Future Year", value=2025)
-
-with col7:
-    future_month = st.number_input("Future Month", value=1)
-
-if st.button("🔮 Predict Future AQI", key="future"):
-
-    df = pd.read_csv("data/cleaned_data.csv")
-    avg_values = df.mean()
-
-    future_data = pd.DataFrame([[
-        avg_values['PM2.5'],
-        avg_values['PM10'],
-        avg_values['NO'],
-        avg_values['NO2'],
-        avg_values['NOx'],
-        avg_values['NH3'],
-        avg_values['CO'],
-        avg_values['SO2'],
-        avg_values['O3'],
-        avg_values['Benzene'],
-        avg_values['Toluene'],
-        avg_values['Xylene'],
-        future_year,
-        future_month
-    ]],
-    columns=['PM2.5', 'PM10', 'NO', 'NO2', 'NOx', 'NH3',
-             'CO', 'SO2', 'O3', 'Benzene',
-             'Toluene', 'Xylene', 'year', 'month'])
-
-    future_aqi = model.predict(future_data)[0]
-
-    st.success(f"🔮 Future AQI: {future_aqi:.2f}")
