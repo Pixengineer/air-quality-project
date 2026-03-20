@@ -4,14 +4,14 @@ import joblib
 import os
 from sklearn.ensemble import RandomForestRegressor
 
-# ---------------- PATH FIX ---------------- #
+# ---------------- PATH ---------------- #
 DATA_PATH = "data/cleaned_data.csv"
 
 # ---------------- AUTO TRAIN MODEL ---------------- #
 if not os.path.exists("model.pkl"):
 
     if not os.path.exists(DATA_PATH):
-        st.error("❌ Data file not found! Check folder name: data/cleaned_data.csv")
+        st.error("❌ Data file not found!")
         st.stop()
 
     df = pd.read_csv(DATA_PATH)
@@ -80,10 +80,59 @@ if st.button("🚀 Predict AQI", key="predict"):
     st.subheader("🎯 Prediction Result")
 
     if aqi <= 50:
-        st.success(f"🌿 AQI: {aqi:.2f} (Good)")
+        st.success(f"AQI: {aqi:.2f} (Good)")
     elif aqi <= 100:
-        st.warning(f"🌤 AQI: {aqi:.2f} (Moderate)")
+        st.warning(f"AQI: {aqi:.2f} (Moderate)")
     elif aqi <= 200:
-        st.error(f"😷 AQI: {aqi:.2f} (Poor)")
+        st.error(f"AQI: {aqi:.2f} (Poor)")
     else:
-        st.error(f"☠️ AQI: {aqi:.2f} (Very Poor)")
+        st.error(f"AQI: {aqi:.2f} (Very Poor)")
+
+# ---------------- GRAPH ---------------- #
+st.markdown("---")
+st.subheader("📈 AQI Trend (Last 100 Records)")
+
+if st.button("📊 Show Graph", key="graph"):
+    df = pd.read_csv(DATA_PATH)
+    st.line_chart(df.tail(100)["AQI"])
+
+# ---------------- FUTURE PREDICTION ---------------- #
+st.markdown("---")
+st.subheader("🔮 Future AQI Prediction")
+
+col6, col7 = st.columns(2)
+
+with col6:
+    future_year = st.number_input("Future Year", value=2025)
+
+with col7:
+    future_month = st.number_input("Future Month", value=1)
+
+if st.button("🔮 Predict Future AQI", key="future"):
+
+    df = pd.read_csv(DATA_PATH)
+    avg_values = df.mean()
+
+    future_data = pd.DataFrame([[
+        avg_values['PM2.5'],
+        avg_values['PM10'],
+        avg_values['NO'],
+        avg_values['NO2'],
+        avg_values['NOx'],
+        avg_values['NH3'],
+        avg_values['CO'],
+        avg_values['SO2'],
+        avg_values['O3'],
+        avg_values['Benzene'],
+        avg_values['Toluene'],
+        avg_values['Xylene'],
+        future_year,
+        future_month
+    ]],
+    columns=['PM2.5', 'PM10', 'NO', 'NO2', 'NOx', 'NH3',
+             'CO', 'SO2', 'O3', 'Benzene',
+             'Toluene', 'Xylene', 'year', 'month'])
+
+    future_aqi = model.predict(future_data)[0]
+
+    st.success(f"🔮 Future AQI: {future_aqi:.2f}")
